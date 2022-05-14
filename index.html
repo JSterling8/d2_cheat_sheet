@@ -2277,6 +2277,14 @@ function getScreenSize()
     return null;
 }
 
+function isElementWithStyle( tokenlist, stylename )
+{
+    for( var i = 0; i < tokenlist.length; i++ )
+        if( tokenlist[i] == stylename )
+            return true;
+    return false;
+}
+
 function isTableSortColumnSelected( buttonName, className )
 {
     var elem       = document.getElementById( buttonName );
@@ -2478,6 +2486,38 @@ function setCollapseTable( tableName, isCollapsed, button )
     {
         if( isCollapsed ) rows[row].classList.add   ( 'collapsed' );
         else              rows[row].classList.remove( 'collapsed' );
+    }
+
+    // When a table is minimized hide the bottom border to minimize clutter
+    var header = rows[0],
+        style  = header.classList,
+        hasR = isElementWithStyle( style, 'rt'    ),
+        hasG = isElementWithStyle( style, 'gt'    ),
+        hasB = isElementWithStyle( style, 'bt'    ),
+        hasK = isElementWithStyle( style, 'kt'    ), // Item Sockets
+        hasY = isElementWithStyle( style, 'yb'    ), // Holy Grail
+        rare = isElementWithStyle( style, 'raret' ), // Up Rare
+        unq  = isElementWithStyle( style, 'unqt'  ); // Up Unq
+
+    if( isCollapsed )
+    {
+        if( hasR ) header.classList.remove( 'rb'    );
+        if( hasG ) header.classList.remove( 'gb'    );
+        if( hasB ) header.classList.remove( 'bb'    );
+        if( hasK ) header.classList.remove( 'kb'    );
+        if( hasY ) header.classList.remove( 'yb'    );
+        if( rare ) header.classList.remove( 'rareb' );
+        if( unq  ) header.classList.remove( 'unqb'  );
+    }
+    else
+    {
+        if( hasR ) header.classList.add( 'rb'    );
+        if( hasG ) header.classList.add( 'gb'    );
+        if( hasB ) header.classList.add( 'bb'    );
+        if( hasK ) header.classList.add( 'kb'    );
+        if( hasY ) header.classList.add( 'yb'    );
+        if( rare ) header.classList.add( 'rareb' );
+        if( unq  ) header.classList.add( 'unqb'  );
     }
 }
 
@@ -2922,20 +2962,33 @@ function updateRuneWordsOwned()
 
 function updateRuneWordsVisible()
 {
-    var rw, rune, runes, tr, seen;
+    var haveRune, next, plus = 0, rw, rune, runeLen, runes, td, text, tr, seen, sor, eor;
 
     for( rw = 0; rw < gaRuneWordRunes.length; rw++ )
     {
         tr    = document.getElementById( 'rw' + rw );
+        td    = tr.childNodes[0];
+        text  = td.innerHTML;
         runes = gaRuneWordRunes[rw];
-        seen  = 1;
+        seen  = 1; // missing at least one rune
+
+        sor  = COLUMNS[4];
+        eor  = text.indexOf( "<button" );
+        next = text.substr(sor,eor-sor); // "Ral + Ort + Tal"
 
         for( rune = 0; rune < runes.length; rune++ )
         {
-            if( !gaAvailableRunes[ runes[ rune ] ] )
+            haveRune = gaAvailableRunes[ runes[ rune ] ];
+            runeLen  = getRuneLength( next );
+
+            // markup rune with <span class=''> or <span class='rune'>
+            // text = colorizeRune( text, next, haveRune, runeLength );
+            plus = next.indexOf('+',plus);
+            next = next.substr(plus+2);
+
+            if( !haveRune )
             {
                 seen = 0;
-                break;
             }
         }
 
@@ -3670,6 +3723,13 @@ for chests to drop this rune<br>
 <span class='note'>*</span> Champion, Unique, Super Unique monsters<br>
 have a higher mlvl (better drop rate)<br>
 <br>
+<span class='resf'>F</span> = Fire Immune<br>
+<span class='resc'>C</span> = Cold Immune<br>
+<span class='resl'>L</span> = Lightning Immune<br>
+<span class='resp'>p</span> = Poison Immune<br>
+<span class='resh'>p</span> = Physical Immune<br>
+<span class='resm'>m</span> = Magic Immune<br></span>
+<br>
 Hell Cows are mlvl 81; <span class='note'>following uniques do NOT drop:</span><br>
 <table class='head'>
             <tr><th>mlvl   </th><th               >Unique           <meta/>                 </th><th>Type            </th></tr>
@@ -3694,15 +3754,15 @@ Hell Cows are mlvl 81; <span class='note'>following uniques do NOT drop:</span><
                             <tr><td class='tooltip'> 1  Cold Plains       Burial Grounds  Mausoleum              4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 1  Stony Field                       Underground Passage 2  2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 1            6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                            <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 2            2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>                            
+                            <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 2            2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 2  Lut Gholein       Rocky Waste     Stony Tomb Level 1     6-8 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 2  Lut Gholein       Rocky Waste     Stony Tomb Level 2     3-4 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 2  Far Oasis         Far Oasis       Maggot Lair 3          4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 2  Lost City         Lost City       Ancient Tunnels        6-8 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
-                            <tr><td class='tooltip'> 3  Spider Forest     Spider Forest   Arachnid Lair          4-5 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>                            
+                            <tr><td class='tooltip'> 3  Spider Forest     Spider Forest   Arachnid Lair          4-5 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 1     5-6 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 2     5-5 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                            <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 3     2-3 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>                            
+                            <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 3     2-3 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
                             <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Disused Fane            2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
                             <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Ruined Temple           2  <span class='resf'>F</span><span class='resc'>C</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
                             <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Kurast Sewers Levels 1 6-7 <span class='padd'>.</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
@@ -3737,6 +3797,13 @@ Hell Cows are mlvl 81; <span class='note'>following uniques do NOT drop:</span><
 <span class='note'>*</span> Champion, Unique, Super Unique monsters<br>
 have a higher mlvl (better drop rate)<br>
 <br>
+<span class='resf'>F</span> = Fire Immune<br>
+<span class='resc'>C</span> = Cold Immune<br>
+<span class='resl'>L</span> = Lightning Immune<br>
+<span class='resp'>p</span> = Poison Immune<br>
+<span class='resh'>p</span> = Physical Immune<br>
+<span class='resm'>m</span> = Magic Immune<br></span>
+<br>
 Hell Cows are mlvl 81; <span class='note'>following uniques do NOT drop:</span><br>
 <table class='head'>
             <tr><th>mlvl   </th><th               >Unique           <meta/>                 </th><th>Type            </th></tr>
@@ -3758,20 +3825,37 @@ Hell Cows are mlvl 81; <span class='note'>following uniques do NOT drop:</span><
             <tr><td>   </td><td><span class='unq'>Azurewrath</span>          </td><td>Phase Blade     </td></tr>
             <tr><td>   </td><td><span class='unq'>Tyrael's Might</span>      </td><td>Sacred Armor    </td></tr>
         </table></center></span></th></tr>
-                <tr><td class='tooltip'> 1  Cold Plains       Burial Grounds  Mausoleum          4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 1        6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 2        2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 2  Far Oasis         Far Oasis       Maggot Lair 3      4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 2  Lost City         Lost City       Ancient Tunnels    6-8 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
-                <tr><td class='tooltip'> 3  Upper Kurast      Upper Kurast    Forgotten Temple    2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 3  Upper Kurast      Kurast Causeway Ruined Fane         2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 3  Upper Kurast      Kurast Causeway Disused Reliquary   2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 4  River of Flame          --        River of Flame     6-7 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 4  River of Flame          --        Chaos Sanctuary    6-7 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 1  6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
-                <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 2  6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
-                <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 3  6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
-                <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Throneroom         6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 1  Cold Plains       Burial Grounds  Mausoleum              4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 1  Stony Field                       Underground Passage 2  2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 1            6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 1  Outer Cloister    Tamoe Highland  Pit Level 2            2-3 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 2  Lut Gholein       Rocky Waste     Stony Tomb Level 1     6-8 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 2  Lut Gholein       Rocky Waste     Stony Tomb Level 2     3-4 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 2  Far Oasis         Far Oasis       Maggot Lair 3          4-5 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 2  Lost City         Lost City       Ancient Tunnels        6-8 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Spider Forest     Spider Forest   Arachnid Lair          4-5 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 1     5-6 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 2     5-5 <span class='resf'>F</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Flayer Jungle     Flayer Jungle   Swampy Pit Level 3     2-3 <span class='padd'>.</span><span class='padd'>.</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Disused Fane            2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Ruined Temple           2  <span class='resf'>F</span><span class='resc'>C</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Kurast Sewers Levels 1 6-7 <span class='padd'>.</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Kurast Bazaar     Kurast Bazaar   Kurast Sewers Levels 2  ?1 <span class='padd'>.</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Upper Kurast      Upper Kurast    Forgotten Temple        2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Upper Kurast      Upper Kurast    Forgotten Reliquary     2  <span class='resf'>F</span><span class='resc'>C</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 3  Upper Kurast      Kurast Causeway Ruined Fane             2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 3  Upper Kurast      Kurast Causeway Disused Reliquary       2  <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 4  River of Flame          --        River of Flame         6-7 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 4  River of Flame          --        Chaos Sanctuary        6-7 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 5  Frigid Highlands  Frigid Highlnds Abaddon                6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>p</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 5  Arreat Plateau    Pit of Acheron  Pit of Acheron         6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='padd'>.</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 5  Glacial Trail     Glacial Trail   Drifter Cavern         6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 5  Frozen Tundra     Frozen Tundra   Infernal Pit           3-4 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 5  Ancients' Way     Ancients' Way   Icy Cellar             6-8 <span class='padd'>.</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 1      6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='padd'>.</span><span class='padd'>.</span><span class='padd'>.</span></td></tr>
+                            <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 2      6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='padd'>.</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Worldstone Keep 3      6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
+                            <tr><td class='tooltip'> 5  Worldstone Keep 2       --        Throneroom             6-8 <span class='resf'>F</span><span class='resc'>C</span><span class='resl'>L</span><span class='resp'>P</span><span class='resh'>p</span><span class='resm'>m</span></td></tr>
             </table>
 <br>
             <table class='head ios-runes1' id='table.runes1'>
@@ -6231,9 +6315,9 @@ Holy Grail;
     <tr><td><div class='wp'></div></td><td class='tooltip k22'>Crystalline Passage     29  61  <meta              />82<meta/> <span class='l'>Left</span     ><span class='c'  > S&rarr;FR   </span   ><span class='r'>wp   </span></td></tr>
     <tr><td                      ></td><td class='tooltip k11'>  Frozen River          29  61  <span class='alvl83'>83</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
     <tr><td                      ></td><td class='tooltip k22'>Nihlathak's Temple      32  63  <span class='alvl83'>83</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
-    <tr><td                      ></td><td class='tooltip k11'>  Halls of Anguish      33  63  <span class='alvl83'>83</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
-    <tr><td><div class='wp'></div></td><td class='tooltip k22'>  Halls of Pain         34  64  <span class='alvl84'>84</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
-    <tr><td                      ></td><td class='tooltip k11'>  Halls of Vaught       36  64  <span class='alvl84'>84</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
+    <tr><td                      ></td><td class='tooltip k11'>  Halls of Anguish      33  63  <span class='alvl83'>83</span> <span class='l'>    </span     ><span class='c'  >   </span      ><span class='r'>2 red eyes</span></td></tr>
+    <tr><td><div class='wp'></div></td><td class='tooltip k22'>  Halls of Pain         34  64  <span class='alvl84'>84</span> <span class='l'>    </span     ><span class='c'  >   </span      ><span class='r'>2 red eyes</span></td></tr>
+    <tr><td                      ></td><td class='tooltip k11'>  Halls of Vaught       36  64  <span class='alvl84'>84</span> <span class='l'>    </span     ><span class='c'  >   </span      ><span class='r'>2 red eyes</span></td></tr>
     <tr><td><div class='wp'></div></td><td class='tooltip k22'>Glacial Trail           29  61  <span class='alvl83'>83</span> <span class='l'>Left</span     ><span class='c'  >        </span   ><span class='r'>wp   </span></td></tr>
     <tr><td                      ></td><td class='tooltip k11'>  Drifter Cavern        29  61  <span class='alvl85'>85</span> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
     <tr><td><div class='wp'></div></td><td class='tooltip k22'>Frozen Tundra           27  60  <meta              />81<meta/> <span class='l'>    </span     ><span class='c'  >        </span   ><span class='r'>     </span></td></tr>
@@ -6427,9 +6511,10 @@ Thanks:
   * gregrperkins            for catching   Amethyst Strength amount
   * walkawayy               for Patch 2.4 Runewords!
   * Jazzer360               for suggestion of colorizing runes in rune manifest
+  * MauledbyJebus           for suggestion of red eyes in Nihlathak's zones
 </pre>
 <hr class='one'>
-<span style='font-size:12px;'>Version <a href="https://github.com/Michaelangel007/d2_cheat_sheet/commits">1.68</a>, Last Updated Fri, May 13, 2022.</span>
+<span style='font-size:12px;'>Version <a href="https://github.com/Michaelangel007/d2_cheat_sheet/commits">1.72</a>, Last Updated Fri, May 13, 2022.</span>
 <span style='font-size:10px;'>CSS Debug: Screen Size:</span> <span id='screen-size'>?</span>, <span class='ios-hidden' >iOS-hidden</span> <span class='ios-visible'>iOS-visible</span>
 <span style='font-size:6px;'>All bugs are due to Anthony slacking on QA.</span>
 </div></body>
