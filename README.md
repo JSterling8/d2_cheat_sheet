@@ -5,7 +5,7 @@
 # QoL Features
 
  * Readable on desktop and mobile
- * Interactive -- tooltips for runes and runewords
+ * Interactive -- tooltips for runes and runewords (now includes Patch 2.6)
    * Yellow highlight hover row pointer for all tables
  * click on runes to toggle "rune ownership"
    * Clean visual rune upgrades
@@ -24,17 +24,19 @@
  * Collapsible tables
     * Can collapse most of the tables, click on the `-` or `+` button in the top right of the tables (new in v1.18)
     * Click on "Collapse" / "Expand" to collapse/expand all tables (new in 1.31)
+    * Collapse state is persistent (new in 1.84)
  * Act II Mercs
  * Area Levels
    * Shows alvl for every difficulty & zone
    * Shows WP icon for areas that have a waypoint
+   * Shows Terror Zone icon if that area is eligible
    * Work-in-Progress map layout summary
    * Color coded area levels for 83, 84, 85
    * Color coded directions
  * Crafted Gear recipes
  * Gambling odds and few items (new in v1.33)
  * Holy Grail tracking -- no need to login, continue where you left off time you (re)load the page
-   * Can sort by Owned Sets, Set Names, Owned Uniques, Unique Names, Base Name or TC
+   * Can sort by Owned Misc., Owned Sets, Set Names, Owned Uniques, Unique Names, Base Name or TC
  * Essences farming
  * Pandemonium Event (key/organ farming)
  * Shopping tables
@@ -44,11 +46,13 @@
     * Power Leveling
     * Level for each difficulty & area
  * 4os sword farming
- * 85 alvl (TC 84/87) farming info
+ * 85 alvl (TC 84/87) farming info  (Updated for Patch 2.4)
  * Monochrome/Color buttons
  * Lots of handy links to utils, calculators, etc.!
- * Thanks to everyone that caught bugs and offered suggestions that were implemented.
+ * Thanks to everyone that caught bugs and offered suggestions.
 
+
+Special thanks to walkawayy for 2.4 Runewords, Wyrda65 for updated alvl 85 info.
 
 # Wishlist
 
@@ -101,22 +105,12 @@
     <b>Shields</b>
     Herald of Zakarum : 579 (867)
     Homunculus        : 444
-
-
-```
-
- * clvl max xp table -- Furobins: https://diablo2.diablowiki.net/Guide:Diablo_2_Level_Up_Guide_v1.10
-```
-clvl max XP  Act1   Act2   Act3   Act4   Act5
-Normal       1-11  12-18  19-23  24-31  32-36
-Nightmare   37-43  44-48  49-52  53-62   skip
-Hell        63-73  74-80  81-83  83-94  95-99
 ```
 
  * Table of base/set/unique -- see https://www.reddit.com/r/Diablo/comments/q1nzh7/kudos_for_the_cheat_sheet/hfixbpm/
  * Add map layout hints -- see https://docs.google.com/spreadsheets/d/1UQP7PjHgCJWN-s42bUtGsR18f9GNh7JJ15QE7D6CnHE/edit#gid=0
  * Customize yellow hover color
- * ebugging def table for classic D2
+ * Eth bugging def table for classic D2
  * Full xp table?
  * Table header pop-up instructions --  -- pisseningly
  * Diminishing MF -- gekido2802 -- https://diablo2.diablowiki.net/Magic_find_diminishing_returns
@@ -126,7 +120,7 @@ Hell        63-73  74-80  81-83  83-94  95-99
 
 # Not Doing
 
- * url param to keep state of collapsed tables.  Not needed since table collapse state is persistent.
+ * url param to keep state of collapsed tables.  Not needed since table collapse state is persistent. (Fixed in version 1.84)
 
 
-Last Updated: Sun, Oct 31, 2021
+Last Updated: Sun, Feb 26, 2023.
